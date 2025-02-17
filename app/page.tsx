@@ -1,101 +1,139 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState, useEffect } from "react"
+import { Filters } from "@/components/Filters"
+import { getData } from "@/lib/getData"
+import { AssetDistributionPieChart } from "@/components/AssetDistributionPieChart"
+import { AssetTrendLineChart } from "@/components/AssetTrendLineChart"
+import { ComparisonView } from "@/components/ComparisonView"
+import { DetailedDataTable } from "@/components/DetailedDataTable"
+import { DashboardOverview } from "@/components/DashboardOverview"
+import { GeoDistributionChart } from "@/components/GeoDistributionChart"
+import { InfrastructureBarChart } from "@/components/InfrastructureBarChart"
+import { InfrastructurePieChart } from "@/components/InfrastructurePieChart"
+import { InfrastructureTrendChart } from "@/components/InfrastructureTrendChart"
+import { InvestmentBreakdownChart } from "@/components/InvestmentBreakdownChart"
+import { MunicipalityTypeChart } from "@/components/MunicipalityTypeChart"
+import { SummaryStats } from "@/components/SummaryStats"
+import { AssetManagementCapabilities } from "@/components/AssetManagementCapabilities"
+import { AssetManagementQuestionnaire } from "@/components/AssetManagementQuestionnaire"
+import { ExportData } from "@/components/ExportData"
+import PlanningTool from "@/components/PlanningTool"
+
+export default function Page() {
+  const [data, setData] = useState([])
+  const [years, setYears] = useState<number[]>([])
+  const [assets, setAssets] = useState<string[]>([])
+  const [municipalityTypes, setMunicipalityTypes] = useState<string[]>([])
+  const [geoLocations, setGeoLocations] = useState<string[]>([])
+  const [latestYear, setLatestYear] = useState(0)
+  const [defaultAsset, setDefaultAsset] = useState("")
+  const [totalAssets, setTotalAssets] = useState(0)
+  const [totalMunicipalities, setTotalMunicipalities] = useState(0)
+  const [assetTotals, setAssetTotals] = useState([])
+  const [trendData, setTrendData] = useState<any[]>([])
+  const [geoDistribution, setGeoDistribution] = useState([])
+  const [municipalityTypeDistribution, setMunicipalityTypeDistribution] = useState([])
+  const [selectedYear, setSelectedYear] = useState(0)
+  const [selectedAsset, setSelectedAsset] = useState("")
+  const [selectedMunicipalityType, setSelectedMunicipalityType] = useState("All")
+  const [selectedGeoLocation, setSelectedGeoLocation] = useState("All")
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const fetchedData = await getData()
+        setData(fetchedData.data)
+        setYears(fetchedData.years)
+        setAssets(fetchedData.assets)
+        setMunicipalityTypes(fetchedData.municipalityTypes)
+        setGeoLocations(fetchedData.geoLocations)
+        setLatestYear(fetchedData.latestYear)
+        setDefaultAsset(fetchedData.defaultAsset)
+        setTotalAssets(fetchedData.totalAssets)
+        setTotalMunicipalities(fetchedData.totalMunicipalities)
+        setAssetTotals(fetchedData.assetTotals)
+        setTrendData(fetchedData.trendData)
+        setGeoDistribution(fetchedData.geoDistribution)
+        setMunicipalityTypeDistribution(fetchedData.municipalityTypeDistribution)
+        setSelectedYear(fetchedData.years[0])
+        setSelectedAsset(fetchedData.assets[0])
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year)
+  }
+
+  const handleAssetChange = (asset: string) => {
+    setSelectedAsset(asset)
+  }
+
+  const handleMunicipalityTypeChange = (type: string) => {
+    setSelectedMunicipalityType(type)
+  }
+
+  const handleGeoLocationChange = (location: string) => {
+    setSelectedGeoLocation(location)
+  }
+
+  const filteredData = data.filter((item: any) => {
+    if (selectedYear === 0) return true
+    if (
+      selectedMunicipalityType !== "All" &&
+      item["Type of municipality by population size"] !== selectedMunicipalityType
+    )
+      return false
+    if (selectedGeoLocation !== "All" && item.GEO !== selectedGeoLocation) return false
+    return (
+      Number.parseInt(item.REF_DATE) === selectedYear && item["Core public infrastructure assets"] === selectedAsset
+    )
+  })
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    <main className="flex flex-col gap-4 p-4">
+      <Filters
+        years={years}
+        assets={assets}
+        municipalityTypes={municipalityTypes}
+        geoLocations={geoLocations}
+        onYearChange={handleYearChange}
+        onAssetChange={handleAssetChange}
+        onMunicipalityTypeChange={handleMunicipalityTypeChange}
+        onGeoLocationChange={handleGeoLocationChange}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <SummaryStats totalAssets={totalAssets} totalMunicipalities={totalMunicipalities} latestYear={latestYear} />
+        <AssetDistributionPieChart data={assetTotals} />
+        <AssetTrendLineChart data={trendData} />
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <GeoDistributionChart data={geoDistribution} />
+        <MunicipalityTypeChart data={municipalityTypeDistribution} />
+      </div>
+      <ComparisonView data={data} years={years} assets={assets} />
+      <InfrastructureBarChart data={filteredData} asset={"VALUE"} />
+      <InfrastructureTrendChart data={trendData} asset={selectedAsset} />
+      <InfrastructurePieChart data={municipalityTypeDistribution} asset={"VALUE"} />
+      <DetailedDataTable data={filteredData} />
+      <ExportData data={filteredData} filename="municipality_data.csv" />
+      <AssetManagementQuestionnaire />
+      <AssetManagementCapabilities />
+      <PlanningTool />
+      <DashboardOverview
+        totalInvestment={100}
+        publicTransitInvestment={25}
+        greenInfrastructureInvestment={20}
+        socialInfrastructureInvestment={30}
+        ruralNorthernInvestment={15}
+        tradeTransportationInvestment={10}
+      />
+      <InvestmentBreakdownChart data={assetTotals} />
+    </main>
+  )
 }
+
