@@ -17,7 +17,7 @@ type Props = {
 const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white p-4 border rounded shadow">
+      <div className="bg-white p-4 border rounded shadow-sm">
         <p className="font-bold">{label}</p>
         <p>{`${payload[0].name}: ${formatNumber(Number(payload[0].value))}`}</p>
         <p className="text-sm text-gray-500">Click for more details</p>

@@ -14,6 +14,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import _ from 'lodash';
 
+interface AssetDataItem {
+  name: string;
+  type: string;
+  totalValue: number;
+  residentialValue: number;
+  businessValue: number;
+  industrialValue: number;
+  utilitiesValue: number;
+  farmValue: number;
+  residentialPercent: number;
+  businessPercent: number;
+  industrialPercent: number;
+}
+
 const AssetDashboard = () => {
   const [assetData, setAssetData] = useState<AssetDataItem[]>([]);
   const [selectedMunicipality, setSelectedMunicipality] = useState<string | null>(null);
@@ -37,55 +51,8 @@ const AssetDashboard = () => {
     [index: number]: string;
   }
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const response = await window.fs.readFile('Municipal Assessed Values (2024) _ Source_ Province of BC, Local Government Division, LDGE Statistics _ Prepared by CivicInfo BC.json');
-        const text = new TextDecoder().decode(response);
-        const data = JSON.parse(text);
-        
-        const processedData = data.body.map((row: RawDataRow) => ({
-          name: row[0],
-          type: row[1],
-          totalValue: parseFloat(row[9].replace(/,/g, '')),
-          residentialValue: parseFloat(row[2].replace(/,/g, '')),
-          businessValue: parseFloat(row[6].replace(/,/g, '')),
-          industrialValue: parseFloat(row[4].replace(/,/g, '')),
-          utilitiesValue: parseFloat(row[3].replace(/,/g, '')),
-          farmValue: parseFloat(row[8].replace(/,/g, '')),
-          residentialPercent: (parseFloat(row[2].replace(/,/g, '')) / parseFloat(row[9].replace(/,/g, ''))) * 100,
-          businessPercent: (parseFloat(row[6].replace(/,/g, '')) / parseFloat(row[9].replace(/,/g, ''))) * 100,
-          industrialPercent: (parseFloat(row[4].replace(/,/g, '')) / parseFloat(row[9].replace(/,/g, ''))) * 100
-        }));
 
-        const types = _.uniq(processedData.map((item: { type: string }) => item.type)).filter(Boolean) as string[];
-        setMunicipalityTypes(types);
-        
-        setAssetData(processedData);
-        updateAggregateData(processedData, 'all');
-      } catch (error) {
-        console.error('Error loading data:', error);
-      }
-    };
-
-    loadData();
-  }, []);
-
-  interface AssetDataItem {
-    name: string;
-    type: string;
-    totalValue: number;
-    residentialValue: number;
-    businessValue: number;
-    industrialValue: number;
-    utilitiesValue: number;
-    farmValue: number;
-    residentialPercent: number;
-    businessPercent: number;
-    industrialPercent: number;
-  }
-
-  const updateAggregateData = (data: AssetDataItem[], type: string) => {
+  const updateAggregateData = React.useCallback((data: AssetDataItem[], type: string) => {
     const filteredData = type === 'all' ? data : data.filter(item => item.type === type);
     
     const totalAssets = _.sumBy(filteredData, 'totalValue');
@@ -108,9 +75,89 @@ const AssetDashboard = () => {
     };
     
     setAggregateData(aggregateStats);
-  };
+  }, []);
 
-  const handleTypeChange = (type: string) => {
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const response = await window.fs.readFile('Municipal Assessed Values (2024) _ Source_ Province of BC, Local Government Division, LDGE Statistics _ Prepared by CivicInfo BC.json');
+        const text = new TextDecoder().decode(response);
+        const data = JSON.parse(text);
+      
+      interface ProcessedDataRow {
+        name: string;
+        type: string;
+        totalValue: number;
+        residentialValue: number;
+        businessValue: number;
+        industrialValue: number;
+        utilitiesValue: number;
+        farmValue: number;
+        residentialPercent: number;
+        businessPercent: number;
+        industrialPercent: number;
+      }
+  
+      interface AggregateStats {
+        totalMunicipalities: number;
+        totalAssetValue: number;
+        averageAssetValue: number;
+        assetComposition: Array<{ name: string; value: number }>;
+        percentageStats: {
+          avgResidential: number;
+          avgBusiness: number;
+          avgIndustrial: number;
+        };
+      }
+  
+      const processedData: ProcessedDataRow[] = data.body.map((row: RawDataRow) => ({
+        name: row[0],
+        type: row[1],
+        totalValue: Number(row[2]),
+        residentialValue: Number(row[3]),
+        businessValue: Number(row[4]),
+        industrialValue: Number(row[5]),
+        utilitiesValue: Number(row[6]), 
+        farmValue: Number(row[7]),
+        residentialPercent: Number(row[8]),
+        businessPercent: Number(row[9]),
+        industrialPercent: Number(row[10])
+      }));
+  
+      setAssetData(processedData);
+      setMunicipalityTypes(Array.from(new Set(processedData.map(item => item.type))));
+      updateAggregateData(processedData, selectedType);
+  
+      const filteredData = selectedType === 'all' ? processedData : processedData.filter(item => item.type === selectedType);
+      const totalAssets = _.sumBy(filteredData, 'totalValue');
+      const aggregateStats: AggregateStats = {
+        totalMunicipalities: filteredData.length,
+        totalAssetValue: totalAssets,
+        averageAssetValue: totalAssets / filteredData.length,
+        assetComposition: [
+          { name: 'Residential', value: _.sumBy(filteredData, 'residentialValue') },
+          { name: 'Business', value: _.sumBy(filteredData, 'businessValue') },
+          { name: 'Industrial', value: _.sumBy(filteredData, 'industrialValue') },
+          { name: 'Utilities', value: _.sumBy(filteredData, 'utilitiesValue') },
+          { name: 'Farm', value: _.sumBy(filteredData, 'farmValue') }
+        ],
+        percentageStats: {
+          avgResidential: _.meanBy(filteredData, 'residentialPercent'),
+          avgBusiness: _.meanBy(filteredData, 'businessPercent'),
+          avgIndustrial: _.meanBy(filteredData, 'industrialPercent')
+        }
+      };
+  
+      setAggregateData(aggregateStats);
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
+  
+    loadData();
+  }, [selectedType, updateAggregateData]); // Empty dependency array as this should only run once on mount
+
+  const handleTypeChange = (type: string): void => {
     setSelectedType(type);
     updateAggregateData(assetData, type);
   };
@@ -386,11 +433,11 @@ const AssetDashboard = () => {
                 </>
               )}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
-                              </div>
-                            );
-                          };
-                          
-                          export default AssetDashboard;
+                )}
+              </DialogContent>
+            </Dialog>
+          </div>
+        );
+      };
+      
+      export default AssetDashboard;
