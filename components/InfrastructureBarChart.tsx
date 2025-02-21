@@ -1,6 +1,6 @@
 "use client"
 
-import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis, TooltipProps } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatNumber } from "@/lib/utils"
 
@@ -14,12 +14,12 @@ type Props = {
   asset: string
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-4 border rounded shadow">
         <p className="font-bold">{label}</p>
-        <p>{`${payload[0].name}: ${formatNumber(payload[0].value)}`}</p>
+        <p>{`${payload[0].name}: ${formatNumber(Number(payload[0].value))}`}</p>
         <p className="text-sm text-gray-500">Click for more details</p>
       </div>
     )

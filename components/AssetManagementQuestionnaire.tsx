@@ -39,7 +39,7 @@ const questions = [
 export function AssetManagementQuestionnaire() {
   const [answers, setAnswers] = useState({})
 
-  const handleAnswer = (questionId, value) => {
+  const handleAnswer = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }))
   }
 
@@ -62,6 +62,12 @@ export function AssetManagementQuestionnaire() {
             </RadioGroup>
           </div>
         ))}
+        <div className="mt-4 mb-4">
+          <h4 className="font-semibold">Selected Answers:</h4>
+          <pre className="mt-2 p-2 bg-gray-100 rounded">
+            {JSON.stringify(answers, null, 2)}
+          </pre>
+        </div>
         <Button className="mt-4">Submit Assessment</Button>
       </CardContent>
     </Card>

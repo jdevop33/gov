@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 
-type Props = {
-  data: any[]
+type Props<T extends Record<string, unknown>> = {
+  data: T[]
   filename: string
 }
 
-export function ExportData({ data, filename }: Props) {
+export function ExportData<T extends Record<string, unknown>>({ data, filename }: Props<T>) {
   const exportToCSV = () => {
     const headers = Object.keys(data[0])
     const csvContent = [

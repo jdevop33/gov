@@ -11,8 +11,15 @@ type ComparisonData = {
   [key: string]: number | string
 }
 
+type DataItem = {
+  REF_DATE: string
+  "Core public infrastructure assets": string
+  "Type of municipality by population size": string
+  VALUE: string
+}
+
 type Props = {
-  data: any[]
+  data: DataItem[]
   years: number[]
   assets: string[]
 }
