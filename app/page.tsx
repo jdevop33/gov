@@ -3,6 +3,21 @@
 import { useState, useEffect } from "react"
 import { Filters } from "@/components/Filters"
 import { getData } from "@/lib/getData"
+
+interface MunicipalityData {
+  REF_DATE: string;
+  "Type of municipality by population size": string;
+  GEO: string;
+  "Core public infrastructure assets": string;
+  VALUE: number;
+}
+
+interface TrendDataPoint {
+  year: number;
+  value: number;
+  assetType: string;
+  [key: string]: number | string; // Only allow number or string values
+}
 import { AssetDistributionPieChart } from "@/components/AssetDistributionPieChart"
 import { AssetTrendLineChart } from "@/components/AssetTrendLineChart"
 import { ComparisonView } from "@/components/ComparisonView"
@@ -21,19 +36,18 @@ import { ExportData } from "@/components/ExportData"
 import PlanningTool from "@/components/PlanningTool"
 
 export default function Page() {
-  const [data, setData] = useState([])
+  const [data, setData] = useState<MunicipalityData[]>([])
   const [years, setYears] = useState<number[]>([])
   const [assets, setAssets] = useState<string[]>([])
-  const [municipalityTypes, setMunicipalityTypes] = useState<string[]>([])
   const [geoLocations, setGeoLocations] = useState<string[]>([])
+  const [municipalityTypes, setMunicipalityTypes] = useState<string[]>([])
   const [latestYear, setLatestYear] = useState(0)
-  const [defaultAsset, setDefaultAsset] = useState("")
   const [totalAssets, setTotalAssets] = useState(0)
   const [totalMunicipalities, setTotalMunicipalities] = useState(0)
-  const [assetTotals, setAssetTotals] = useState([])
-  const [trendData, setTrendData] = useState<any[]>([])
-  const [geoDistribution, setGeoDistribution] = useState([])
-  const [municipalityTypeDistribution, setMunicipalityTypeDistribution] = useState([])
+  const [assetTotals, setAssetTotals] = useState<{ name: string; value: number; }[]>([])
+  const [trendData, setTrendData] = useState<TrendDataPoint[]>([])
+  const [geoDistribution, setGeoDistribution] = useState<{ name: string; value: number; }[]>([])
+  const [municipalityTypeDistribution, setMunicipalityTypeDistribution] = useState<{ name: string; value: number; }[]>([])
   const [selectedYear, setSelectedYear] = useState(0)
   const [selectedAsset, setSelectedAsset] = useState("")
   const [selectedMunicipalityType, setSelectedMunicipalityType] = useState("All")
@@ -49,9 +63,9 @@ export default function Page() {
         setMunicipalityTypes(fetchedData.municipalityTypes)
         setGeoLocations(fetchedData.geoLocations)
         setLatestYear(fetchedData.latestYear)
-        setDefaultAsset(fetchedData.defaultAsset)
+        setLatestYear(fetchedData.latestYear)
         setTotalAssets(fetchedData.totalAssets)
-        setTotalMunicipalities(fetchedData.totalMunicipalities)
+        setTotalMunicipalities(fetchedData.data.length)
         setAssetTotals(fetchedData.assetTotals)
         setTrendData(fetchedData.trendData)
         setGeoDistribution(fetchedData.geoDistribution)
@@ -81,7 +95,7 @@ export default function Page() {
     setSelectedGeoLocation(location)
   }
 
-  const filteredData = data.filter((item: any) => {
+  const filteredData = data.filter((item: MunicipalityData) => {
     if (selectedYear === 0) return true
     if (
       selectedMunicipalityType !== "All" &&
@@ -109,17 +123,23 @@ export default function Page() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <SummaryStats totalAssets={totalAssets} totalMunicipalities={totalMunicipalities} latestYear={latestYear} />
         <AssetDistributionPieChart data={assetTotals} />
-        <AssetTrendLineChart data={trendData} />
+        <AssetTrendLineChart data={trendData.map(({year, value}) => ({year, value}))} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <GeoDistributionChart data={geoDistribution} />
         <MunicipalityTypeChart data={municipalityTypeDistribution} />
       </div>
       <ComparisonView data={data} years={years} assets={assets} />
-      <InfrastructureBarChart data={filteredData} asset={"VALUE"} />
-      <InfrastructureTrendChart data={trendData} asset={selectedAsset} />
+      <InfrastructureBarChart 
+        data={filteredData.map(item => ({
+          ...item,
+          type: item["Core public infrastructure assets"]
+        }))} 
+        asset={"VALUE"} 
+      />
+      <InfrastructureTrendChart data={trendData.map(({year, value}) => ({year, value}))} asset={selectedAsset} />
       <InfrastructurePieChart data={municipalityTypeDistribution} asset={"VALUE"} />
-      <DetailedDataTable data={filteredData} />
+      <DetailedDataTable data={filteredData.map(item => ({ ...item, UOM: 'dollars', SCALAR_FACTOR: 'millions', VALUE: item.VALUE.toString() }))} />
       <ExportData data={filteredData} filename="municipality_data.csv" />
       <AssetManagementQuestionnaire />
       <AssetManagementCapabilities />

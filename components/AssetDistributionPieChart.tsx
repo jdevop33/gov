@@ -4,9 +4,8 @@ import { Pie, PieChart, ResponsiveContainer, Tooltip, Cell } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { formatNumber } from "@/lib/utils"
 
-type DataItem = {
-  name: string
-  value: number
+interface DataItem {
+  [key: string]: string | number;
 }
 
 type Props = {
