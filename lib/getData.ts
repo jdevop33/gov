@@ -1,5 +1,10 @@
 import { fetchCSVData, processData, getUniqueValues } from "./utils"
 
+interface YearData {
+  year: number;
+  [key: string]: number;
+}
+
 const CSV_URL = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/34100269-TZn55QAO1VlA4KQSWKHvzNdRyZWQGa.csv"
 
 export async function getData() {
@@ -9,7 +14,7 @@ export async function getData() {
   const years = getUniqueValues(processedData, "REF_DATE")
     .map(Number)
     .sort((a, b) => b - a)
-  const assets = getUniqueValues(processedData, "Core public infrastructure assets")
+  const assets = getUniqueValues(processedData, "Core public infrastructure assets") as string[]
   const municipalityTypes = getUniqueValues(processedData, "Type of municipality by population size")
   const geoLocations = getUniqueValues(processedData, "GEO")
   const latestYear = years[0]
@@ -24,15 +29,13 @@ export async function getData() {
   const assetTotals = assets.map((asset) => ({
     name: asset,
     value: processedData
-      .filter(
-        (item) => Number.parseInt(item.REF_DATE) === latestYear && item["Core public infrastructure assets"] === asset,
-      )
+      .filter((item) => Number.parseInt(item.REF_DATE) === latestYear && item["Core public infrastructure assets"] === asset)
       .reduce((sum, item) => sum + Number.parseFloat(item.VALUE), 0),
   }))
 
   const trendData = years.map((year) => {
-    const yearData: any = { year }
-    assets.forEach((asset) => {
+    const yearData: YearData = { year }
+    assets.forEach((asset: string) => {
       yearData[asset] = processedData
         .filter(
           (item) => Number.parseInt(item.REF_DATE) === year && item["Core public infrastructure assets"] === asset,

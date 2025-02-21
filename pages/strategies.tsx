@@ -37,7 +37,7 @@ const Strategies: React.FC = () => {
       </Typography>
       <Typography variant="body1" paragraph>
         Based on the results from the planning tool, consider implementing one or more of the following strategies to
-        improve your municipality's long-term financial sustainability:
+        improve your municipality&apos;s long-term financial sustainability:
       </Typography>
       <List>
         {strategies.map((strategy, index) => (
@@ -48,7 +48,7 @@ const Strategies: React.FC = () => {
         ))}
       </List>
       <Typography variant="body1" sx={{ mt: 4 }}>
-        Remember, the best approach often involves a combination of these strategies tailored to your municipality's
+        Remember, the best approach often involves a combination of these strategies tailored to your municipality&apos;s
         specific needs and circumstances.
       </Typography>
       <Box sx={{ mt: 4, display: "flex", justifyContent: "space-between" }}>
