@@ -1,7 +1,8 @@
-import type React from "react"
+import React from "react"
 import type { Metadata } from "next"
 import { Inter, Roboto_Mono } from "next/font/google"
 import "./globals.css"
+import ClientLayout from "@/components/ClientLayout"
 
 // Primary font for text
 const inter = Inter({ 
@@ -35,7 +36,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
       <body className={`${inter.variable} ${robotoMono.variable} font-sans bg-background text-foreground antialiased min-h-screen flex flex-col`}>
-        {children}
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   )

@@ -25,8 +25,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const savedMode = localStorage.getItem('darkMode')
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
     setDarkMode(savedMode === 'true' || (!savedMode && prefersDark))
-    
-    // Apply dark mode
+  }, [])
+  
+  // Apply dark mode in a separate effect to avoid circular dependency
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark')
     } else {
