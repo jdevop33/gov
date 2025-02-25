@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
-
 @theme {
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -74,21 +72,26 @@
   }
   .trend-positive {
     color: hsl(142.1 70.6% 45.3%);
-    @custom-variant dark {
-      color: hsl(142.1 70.6% 45.3% / 0.9);
-    }
   }
+  
+  .dark .trend-positive {
+    color: hsl(142.1 70.6% 45.3% / 0.9);
+  }
+  
   .trend-negative {
     color: hsl(0 84.2% 60.2%);
-    @custom-variant dark {
-      color: hsl(0 84.2% 60.2% / 0.9);
-    }
   }
+  
+  .dark .trend-negative {
+    color: hsl(0 84.2% 60.2% / 0.9);
+  }
+  
   .trend-neutral {
     color: hsl(215 16% 47%);
-    @custom-variant dark {
-      color: hsl(215 16% 47% / 0.9);
-    }
+  }
+  
+  .dark .trend-neutral {
+    color: hsl(215 16% 47% / 0.9);
   }
   .card-dashboard {
     background-color: hsl(var(--card));
