@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-
-declare global {
-  interface Window {
-    fs: {
-      readFile: (path: string) => Promise<Uint8Array>;
-    }
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import _ from 'lodash';
   }
 }
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -51,8 +49,7 @@ const AssetDashboard = () => {
     [index: number]: string;
   }
 
-
-  const updateAggregateData = React.useCallback((data: AssetDataItem[], type: string) => {
+  const updateAggregateData = useCallback((data: AssetDataItem[], type: string) => {
     const filteredData = type === 'all' ? data : data.filter(item => item.type === type);
     
     const totalAssets = _.sumBy(filteredData, 'totalValue');
@@ -80,10 +77,14 @@ const AssetDashboard = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const response = await window.fs.readFile('Municipal Assessed Values (2024) _ Source_ Province of BC, Local Government Division, LDGE Statistics _ Prepared by CivicInfo BC.json');
-        const text = new TextDecoder().decode(response);
-        const data = JSON.parse(text);
-      
+        const response = await fetch('/data.json');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
+        }
+        const text = await response.text();
+
+        const data = JSON.parse(text)
+
       interface ProcessedDataRow {
         name: string;
         type: string;
@@ -104,7 +105,7 @@ const AssetDashboard = () => {
         averageAssetValue: number;
         assetComposition: Array<{ name: string; value: number }>;
         percentageStats: {
-          avgResidential: number;
+          avgResidential: number;        
           avgBusiness: number;
           avgIndustrial: number;
         };
@@ -117,7 +118,7 @@ const AssetDashboard = () => {
         residentialValue: Number(row[3]),
         businessValue: Number(row[4]),
         industrialValue: Number(row[5]),
-        utilitiesValue: Number(row[6]), 
+        utilitiesValue: Number(row[6]),
         farmValue: Number(row[7]),
         residentialPercent: Number(row[8]),
         businessPercent: Number(row[9]),
@@ -127,7 +128,7 @@ const AssetDashboard = () => {
       setAssetData(processedData);
       setMunicipalityTypes(Array.from(new Set(processedData.map(item => item.type))));
       updateAggregateData(processedData, selectedType);
-  
+
       const filteredData = selectedType === 'all' ? processedData : processedData.filter(item => item.type === selectedType);
       const totalAssets = _.sumBy(filteredData, 'totalValue');
       const aggregateStats: AggregateStats = {
@@ -148,19 +149,20 @@ const AssetDashboard = () => {
         }
       };
   
-      setAggregateData(aggregateStats);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    }
-  };
-  
+        setAggregateData(aggregateStats);
+        } catch (error) {
+          console.error('Error loading data:', error);
+        }
+      };
+
     loadData();
-  }, [selectedType, updateAggregateData]); // Empty dependency array as this should only run once on mount
+    }, [selectedType, updateAggregateData]);
 
   const handleTypeChange = (type: string): void => {
     setSelectedType(type);
     updateAggregateData(assetData, type);
   };
+
 
   const formatValue = (value: number) => {
     return new Intl.NumberFormat('en-CA', {
@@ -176,7 +178,7 @@ const AssetDashboard = () => {
   };
 
   const getTopMunicipalities = () => {
-    const filteredData = selectedType === 'all' 
+    const filteredData = selectedType === 'all'
       ? assetData 
       : assetData.filter(item => item.type === selectedType);
     return _.orderBy(filteredData, ['totalValue'], ['desc']).slice(0, 10);
@@ -184,7 +186,7 @@ const AssetDashboard = () => {
 
   const getMunicipalityDetails = (municipality: string) => {
     if (!municipality) return null;
-    
+
     const data = assetData.find(item => item.name === municipality);
     if (!data) return null;
 
@@ -298,7 +300,7 @@ const AssetDashboard = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
-                        className="bg-blue-600 h-2.5 rounded-full" 
+                        className="bg-blue-600 h-2.5 rounded-full"        
                         style={{width: `${aggregateData.percentageStats.avgResidential}%`}}
                       />
                     </div>
@@ -310,7 +312,7 @@ const AssetDashboard = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
-                        className="bg-green-600 h-2.5 rounded-full" 
+                        className="bg-green-600 h-2.5 rounded-full"        
                         style={{width: `${aggregateData.percentageStats.avgBusiness}%`}}
                       />
                     </div>
@@ -322,7 +324,7 @@ const AssetDashboard = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2.5">
                       <div 
-                        className="bg-yellow-600 h-2.5 rounded-full" 
+                        className="bg-yellow-600 h-2.5 rounded-full"        
                         style={{width: `${aggregateData.percentageStats.avgIndustrial}%`}}
                       />
                     </div>
@@ -384,7 +386,7 @@ const AssetDashboard = () => {
               <TableBody>
                 {getTopMunicipalities().map((municipality) => (
                   <TableRow 
-                    key={municipality.name}
+                    key={municipality.name} 
                     className="cursor-pointer hover:bg-gray-100"
                     onClick={() => setSelectedMunicipality(municipality.name)}
                   >
@@ -419,7 +421,7 @@ const AssetDashboard = () => {
                           <span>Total Value:</span>
                           <span>{formatValue(getMunicipalityDetails(selectedMunicipality)?.totalValue ?? 0)}</span>
                         </div>
-                        {getMunicipalityDetails(selectedMunicipality)?.compositionData?.map(item => (
+                        {getMunicipalityDetails(selectedMunicipality)?.compositionData?.map((item) => (
                           <div key={item.name}>
                             <div className="flex justify-between">
                               <span>{item.name}:</span>
@@ -439,5 +441,5 @@ const AssetDashboard = () => {
           </div>
         );
       };
-      
+
       export default AssetDashboard;
