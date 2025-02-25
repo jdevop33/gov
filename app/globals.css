@@ -67,30 +67,50 @@
 }
 
 @layer utilities {
-  .font-mono {
-    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  }
-  .font-sans {
-    font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  }
   .finance-value {
-    @apply font-mono font-medium;
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 500;
   }
   .trend-positive {
-    @apply text-emerald-600 dark:text-emerald-400;
+    color: hsl(142.1 70.6% 45.3%);
+    @custom-variant dark {
+      color: hsl(142.1 70.6% 45.3% / 0.9);
+    }
   }
   .trend-negative {
-    @apply text-red-600 dark:text-red-400;
+    color: hsl(0 84.2% 60.2%);
+    @custom-variant dark {
+      color: hsl(0 84.2% 60.2% / 0.9);
+    }
   }
   .trend-neutral {
-    @apply text-slate-600 dark:text-slate-400;
+    color: hsl(215 16% 47%);
+    @custom-variant dark {
+      color: hsl(215 16% 47% / 0.9);
+    }
   }
   .card-dashboard {
-    @apply bg-card rounded-lg border border-border shadow-sm p-4 hover:shadow-md transition-shadow duration-200;
+    background-color: hsl(var(--card));
+    border-radius: 0.5rem;
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    padding: 1rem;
+    transition-property: box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 200ms;
+  }
+  .card-dashboard:hover {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   }
   .dashboard-grid {
-    @apply grid gap-4 md:gap-6;
+    display: grid;
+    gap: 1rem;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  }
+  @media (min-width: 768px) {
+    .dashboard-grid {
+      gap: 1.5rem;
+    }
   }
 }
 
