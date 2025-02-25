@@ -1,5 +1,4 @@
 import React from "react"
-import type { Metadata } from "next"
 import { Inter, Roboto_Mono } from "next/font/google"
 import "./globals.css"
 import ClientLayout from "@/components/ClientLayout"
@@ -18,7 +17,7 @@ const robotoMono = Roboto_Mono({
   display: "swap"
 })
 
-export const metadata: Metadata = {
+export const metadata = {
   title: "BC Municipality Infrastructure Dashboard",
   description: "Financial insights and infrastructure benchmarks for BC municipal managers and CFOs",
   keywords: "BC municipality, infrastructure, financial planning, asset management, municipal finance",
