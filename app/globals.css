@@ -67,6 +67,7 @@
 }
 
 @layer utilities {
+  /* Monospace font for financial values */
   .finance-value {
     font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-weight: 500;
