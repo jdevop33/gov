@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -30,6 +29,7 @@ export function Filters({
   const [selectedAsset, setSelectedAsset] = useState<string>("")
   const [selectedMunicipalityType, setSelectedMunicipalityType] = useState<string>("All")
   const [selectedGeoLocation, setSelectedGeoLocation] = useState<string>("All")
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
 
   useEffect(() => {
     if (years.length > 0) {
@@ -65,47 +65,70 @@ export function Filters({
   }
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="w-full space-y-4">
+      <div className="flex flex-col sm:flex-row gap-4">
+        {/* Primary Filters - Always Visible */}
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="year" className="text-xs text-muted-foreground uppercase tracking-wider">
+            Fiscal Year
+          </Label>
+          <Select onValueChange={handleYearChange} value={selectedYear}>
+            <SelectTrigger id="year" className="w-full bg-background">
+              <SelectValue placeholder="Select year" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex-1 space-y-2">
+          <Label htmlFor="asset" className="text-xs text-muted-foreground uppercase tracking-wider">
+            Asset Category
+          </Label>
+          <Select onValueChange={handleAssetChange} value={selectedAsset}>
+            <SelectTrigger id="asset" className="w-full bg-background">
+              <SelectValue placeholder="Select asset type" />
+            </SelectTrigger>
+            <SelectContent>
+              {assets.map((asset) => (
+                <SelectItem key={asset} value={asset}>
+                  {asset}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        
+        {/* Toggle Button for Advanced Filters */}
+        <div className="flex items-end">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="py-2 px-4 text-sm font-medium text-primary hover:text-primary/90 focus:outline-none"
+          >
+            {showAdvanced ? "Hide Filters" : "Advanced Filters"}
+          </button>
+        </div>
+      </div>
+      
+      {/* Advanced Filters - Conditionally Visible */}
+      {showAdvanced && (
+        <div className="pt-4 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="year">Select Year</Label>
-            <Select onValueChange={handleYearChange} value={selectedYear}>
-              <SelectTrigger id="year">
-                <SelectValue placeholder="Select year" />
-              </SelectTrigger>
-              <SelectContent>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="asset">Select Asset Type</Label>
-            <Select onValueChange={handleAssetChange} value={selectedAsset}>
-              <SelectTrigger id="asset">
-                <SelectValue placeholder="Select asset type" />
-              </SelectTrigger>
-              <SelectContent>
-                {assets.map((asset) => (
-                  <SelectItem key={asset} value={asset}>
-                    {asset}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="municipalityType">Select Municipality Type</Label>
+            <Label htmlFor="municipalityType" className="text-xs text-muted-foreground uppercase tracking-wider">
+              Municipality Size
+            </Label>
             <Select onValueChange={handleMunicipalityTypeChange} value={selectedMunicipalityType}>
-              <SelectTrigger id="municipalityType">
+              <SelectTrigger id="municipalityType" className="w-full bg-background">
                 <SelectValue placeholder="Select municipality type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="All">All Sizes</SelectItem>
                 {municipalityTypes.map((type) => (
                   <SelectItem key={type} value={type}>
                     {type}
@@ -114,14 +137,17 @@ export function Filters({
               </SelectContent>
             </Select>
           </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="geoLocation">Select Geographic Location</Label>
+            <Label htmlFor="geoLocation" className="text-xs text-muted-foreground uppercase tracking-wider">
+              Geographic Region
+            </Label>
             <Select onValueChange={handleGeoLocationChange} value={selectedGeoLocation}>
-              <SelectTrigger id="geoLocation">
+              <SelectTrigger id="geoLocation" className="w-full bg-background">
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="All">All</SelectItem>
+                <SelectItem value="All">All Regions</SelectItem>
                 {geoLocations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -131,8 +157,8 @@ export function Filters({
             </Select>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   )
 }
 
