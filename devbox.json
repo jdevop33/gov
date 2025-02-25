@@ -1,0 +1,39 @@
+{
+  "channel": "stable-24.05",
+  "packages": [
+    "nodejs_20"
+  ],
+  "idx.extensions": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "bradlc.vscode-tailwindcss",
+    "ms-vscode.vscode-typescript-next",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-rename-tag",
+    "christian-kohler.path-intellisense",
+    "dsznajder.es7-react-js-snippets",
+    "mikestead.dotenv",
+    "PKief.material-icon-theme",
+    "Prisma.prisma",
+    "rangav.vscode-thunder-client",
+    "yoavbls.pretty-ts-errors",
+    "streetsidesoftware.code-spell-checker"
+  ],
+  "idx.previews": {
+    "previews": {
+      "web": {
+        "command": [
+          "npm",
+          "run",
+          "dev",
+          "--",
+          "--port",
+          "$PORT",
+          "--hostname",
+          "0.0.0.0"
+        ],
+        "manager": "web"
+      }
+    }
+  }
+}
